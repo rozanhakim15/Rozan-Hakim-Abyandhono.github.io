@@ -1,0 +1,73 @@
+// ---- scroll progress bar ----
+const progress = document.getElementById('progress');
+function updateProgress(){
+  const h = document.documentElement;
+  const scrolled = h.scrollTop;
+  const max = h.scrollHeight - h.clientHeight;
+  progress.style.width = (max > 0 ? (scrolled/max)*100 : 0) + '%';
+}
+document.addEventListener('scroll', updateProgress, { passive:true });
+updateProgress();
+ 
+// ---- scrollspy nav ----
+const navLinks = [...document.querySelectorAll('#sectionNav a')];
+const sections = navLinks.map(a => document.getElementById(a.dataset.target));
+const spy = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    const link = navLinks.find(a => a.dataset.target === entry.target.id);
+    if(!link) return;
+    if(entry.isIntersecting) {
+      navLinks.forEach(a=>a.classList.remove('active'));
+      link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+sections.forEach(s => s && spy.observe(s));
+ 
+// ---- theme toggle ----
+const themeBtn = document.getElementById('themeToggle');
+function applyTheme(t){
+  if(t === 'light'){ document.documentElement.setAttribute('data-theme','light'); themeBtn.textContent='☀️'; }
+  else if(t === 'dark'){ document.documentElement.setAttribute('data-theme','dark'); themeBtn.textContent='🌙'; }
+  else { document.documentElement.removeAttribute('data-theme'); themeBtn.textContent='🌓'; }
+}
+let saved = null;
+try{ saved = localStorage.getItem('rha-cv-theme'); }catch(e){}
+applyTheme(saved);
+themeBtn.addEventListener('click', ()=>{
+  const current = document.documentElement.getAttribute('data-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const effectiveDark = current ? current === 'dark' : prefersDark;
+  const next = effectiveDark ? 'light' : 'dark';
+  applyTheme(next);
+  try{ localStorage.setItem('rha-cv-theme', next); }catch(e){}
+});
+ 
+// ---- expandable timeline ----
+document.querySelectorAll('.tl-head').forEach(head=>{
+  head.addEventListener('click', ()=>{
+    head.closest('.tl-item').classList.toggle('open');
+  });
+});
+// open the most recent entry by default
+document.querySelector('.tl-item')?.classList.add('open');
+ 
+// ---- download CV as HTML (plain browser download, works anywhere) ----
+const dlBtn = document.getElementById('downloadBtn');
+dlBtn.addEventListener('click', ()=>{
+  try{
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Rozan_Hakim_Abyandhono_CV.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }catch(e){
+    dlBtn.textContent = 'Couldn\u2019t save';
+    setTimeout(()=>dlBtn.textContent='⬇ Download', 1800);
+  }
+});
