@@ -64,7 +64,7 @@
     <p style="color:var(--sub); font-size:0.85rem; margin:-8px 0 16px;">Tap an entry to see details</p>
     <div class="timeline" id="timeline">
  
-      <div class="tl-item">
+   <div class="tl-item">
         <div class="tl-head">
           <div class="tl-head-left">
             <span class="chev">▸</span>
